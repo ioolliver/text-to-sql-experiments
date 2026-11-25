@@ -1,0 +1,11 @@
+[dataset]
+path = "../examples/demo.jsonl"
+name = "demo"
+revision = "v1"
+split = "demo"
+dialect = "SQLite"
+
+[generation]
+temperature = 0.0
+max_tokens = 512
+timeout_seconds = 60

@@ -1,0 +1,16 @@
+[project]
+name = "text-to-sql-experiments"
+version = "0.1.0"
+description = "Controlled experiments for Text-to-SQL"
+requires-python = ">=3.12,<3.13"
+dependencies = []
+
+[project.scripts]
+text-to-sql = "text_to_sql.cli:main"
+
+[build-system]
+requires = ["setuptools==80.9.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]

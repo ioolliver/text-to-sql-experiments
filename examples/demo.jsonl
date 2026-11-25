@@ -1,0 +1,2 @@
+{"id":"library-1","question":"How many books were published after 2000?","schema":"CREATE TABLE books (id INTEGER PRIMARY KEY, title TEXT NOT NULL, publication_year INTEGER);"}
+{"id":"library-2","question":"List the authors who wrote a book published after 2000.","schema":"CREATE TABLE authors (id INTEGER PRIMARY KEY, name TEXT NOT NULL);\nCREATE TABLE books (id INTEGER PRIMARY KEY, title TEXT NOT NULL, publication_year INTEGER, author_id INTEGER REFERENCES authors(id));"}
