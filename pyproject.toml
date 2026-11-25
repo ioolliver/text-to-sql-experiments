@@ -5,8 +5,12 @@ description = "Controlled experiments for Text-to-SQL"
 requires-python = ">=3.12,<3.13"
 dependencies = []
 
+[project.optional-dependencies]
+evaluation = ["nltk", "sqlparse", "tqdm"]
+
 [project.scripts]
 text-to-sql = "text_to_sql.cli:main"
+text-to-sql-eval = "text_to_sql.evaluation.cli:main"
 
 [build-system]
 requires = ["setuptools==80.9.0"]

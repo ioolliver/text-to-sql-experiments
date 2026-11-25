@@ -1,0 +1,7 @@
+[evaluation]
+adapter = "spider"
+split_path = "../data/spider_data/dev.json"
+metric = "test_suite_accuracy"
+database_dir = "../data/spider-test-suite/database"
+upstream_dir = "../data/test-suite-sql-eval"
+timeout_seconds = 60

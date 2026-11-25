@@ -50,7 +50,50 @@ such as `dev:0000`. It opens each example's SQLite database read-only once per
 database to collect every table and view definition, excluding SQLite's
 internal objects. The prompt receives the schema as declared in SQLite and
 the question. Gold SQL and row contents are excluded. The CLI produces
-predictions for later evaluation. It does not execute them or compute accuracy.
+predictions for offline evaluation.
+
+## Evaluate a Spider run
+
+Install the evaluation dependencies and check out the pinned upstream scorer:
+
+```sh
+uv sync --locked --extra evaluation
+mkdir -p data
+git clone https://github.com/taoyds/test-suite-sql-eval.git data/test-suite-sql-eval
+git -C data/test-suite-sql-eval checkout --detach e97acc546ecbee8fa27fa8dbf025ef61493a876c
+```
+
+Download the [official test-suite archive](https://drive.google.com/file/d/1mkCx2GOFIqNesD4y8TDAO1yX1QZORP5w/view)
+linked from the upstream evaluator and extract it so SQLite files are at
+`data/spider-test-suite/database/<db_id>/*.sqlite`.
+
+```sh
+uv run --locked --extra evaluation text-to-sql-eval \
+  --run runs/YOUR_RUN --config configs/spider-eval.toml
+```
+
+This computes **Test Suite Accuracy** over all SQLite instances found for each
+selected database. The wrapper uses the pinned upstream result comparator and
+SQL preprocessing, preserves `DISTINCT`, and evaluates the literals predicted
+by the model. It uses the annotated gold AST for Spider difficulty. The worker
+opens SQLite databases read-only and applies a deadline per SQL statement plus
+a subprocess deadline per example.
+
+For a quicker check on the original Spider databases, use
+`configs/spider-execution-eval.toml`. That reports **Execution Accuracy** and
+requires only the original Spider archive and the upstream scorer checkout.
+
+The command accepts saved full or limited generation runs. It verifies the
+split checksum and expected IDs before scoring. Missing records or duplicates
+abort evaluation. Recorded generation failures and SQL execution errors count
+as incorrect. A gold or evaluator failure withholds the overall accuracy and
+returns exit status 1. The per-example report identifies the affected records.
+
+The default output is `runs/YOUR_RUN/evaluation-<metric>/`. It contains
+`summary.json` with the score, denominator, difficulty breakdown and database
+checksums, and `per_example.jsonl` with one result per ID. Use `--output` with
+a new path to evaluate the same run again. Evaluation does not require API
+credentials.
 
 ## Run the synthetic fixture
 
