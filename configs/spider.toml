@@ -1,0 +1,12 @@
+[dataset]
+format = "spider"
+path = "../data/spider_data/dev.json"
+name = "spider"
+revision = "1.0"
+split = "dev"
+dialect = "SQLite"
+
+[generation]
+temperature = 0.0
+max_tokens = 512
+timeout_seconds = 60

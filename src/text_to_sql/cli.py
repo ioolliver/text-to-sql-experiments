@@ -11,7 +11,7 @@ from pathlib import Path
 from urllib.parse import urlsplit
 
 from .baseline import predict
-from .dataset import load_examples
+from .datasets import load_dataset
 
 
 def git_metadata() -> dict:
@@ -70,18 +70,25 @@ def main() -> int:
             raise ValueError("generation.max_tokens must be a positive integer")
         if type(timeout) not in (int, float) or not 0 < timeout < float("inf"):
             raise ValueError("generation.timeout_seconds must be positive and finite")
-        examples, dataset_hash = load_examples(args.config.parent / dataset["path"])
-        selected = examples[:args.limit]
+        dataset_format = dataset.get("format", "jsonl")
+        if not isinstance(dataset_format, str):
+            raise ValueError("dataset.format must be a string")
+        loaded = load_dataset(args.config.parent / dataset["path"], dataset_format)
+        selected = loaded.examples[:args.limit]
     except (OSError, TypeError, KeyError, ValueError) as exc:
         parser.error(str(exc))
 
     started_at = datetime.now(UTC)
     output = args.output or Path("runs") / started_at.strftime("%Y%m%dT%H%M%S%fZ")
+    dataset_metadata = {**dataset, "format": dataset_format, "sha256": loaded.sha256}
+    if loaded.schema_sha256 is not None:
+        dataset_metadata["schema_sha256"] = loaded.schema_sha256
+
     metadata = {
         **git_metadata(),
         "started_at": started_at.isoformat(),
         "python_version": sys.version.split()[0],
-        "dataset": {**dataset, "sha256": dataset_hash},
+        "dataset": dataset_metadata,
         "generation": {
             "model": model,
             "base_url": base_url,
@@ -110,6 +117,8 @@ def main() -> int:
                     max_tokens=max_tokens,
                     timeout_seconds=timeout,
                 )
+                if "db_id" in example:
+                    prediction["db_id"] = example["db_id"]
                 records.write(json.dumps(prediction, ensure_ascii=False) + "\n")
                 errors += prediction["error"] is not None
     except OSError as exc:

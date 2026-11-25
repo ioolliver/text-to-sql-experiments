@@ -2,7 +2,15 @@
 
 import hashlib
 import json
+from dataclasses import dataclass
 from pathlib import Path
+
+
+@dataclass(frozen=True)
+class LoadedDataset:
+    examples: list[dict[str, str]]
+    sha256: str
+    schema_sha256: dict[str, str] | None = None
 
 
 def load_examples(path: Path) -> tuple[list[dict[str, str]], str]:
@@ -28,3 +36,8 @@ def load_examples(path: Path) -> tuple[list[dict[str, str]], str]:
     if not examples:
         raise ValueError(f"{path}: no examples found")
     return examples, hashlib.sha256(data).hexdigest()
+
+
+def load_jsonl(path: Path) -> LoadedDataset:
+    examples, sha256 = load_examples(path)
+    return LoadedDataset(examples=examples, sha256=sha256)
